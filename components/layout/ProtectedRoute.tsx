@@ -1,5 +1,6 @@
+'use client';
 import React, { useEffect } from 'react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 
 interface ProtectedRouteProps {
@@ -17,7 +18,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
       router.push('/');
       return;
     }
-
     // Check if user has the required role
     if (!allowedRoles.includes(user.role)) {
       // Redirect to appropriate dashboard based on role

@@ -1,4 +1,4 @@
-import { User, Ticket, Comment } from '@/types';
+import { User, Ticket, Comment,UserRole } from '@/types';
 
 // Datos iniciales
 export let users: User[] = [

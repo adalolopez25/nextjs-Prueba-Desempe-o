@@ -5,14 +5,14 @@
       "name": "Cliente Ejemplo",
       "email": "cliente@example.com",
       "role": "client",
-      "password": "cliente"
+      "password": "cliente123"
     },
     {
       "id": "2",
       "name": "Agente Ejemplo",
       "email": "agente@example.com",
       "role": "agent",
-      "password": "agente"
+      "password": "agente123"
     }
   ],
   "tickets": [],
