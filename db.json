@@ -1,0 +1,20 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "name": "Cliente Ejemplo",
+      "email": "cliente@example.com",
+      "role": "client",
+      "password": "cliente"
+    },
+    {
+      "id": "2",
+      "name": "Agente Ejemplo",
+      "email": "agente@example.com",
+      "role": "agent",
+      "password": "agente"
+    }
+  ],
+  "tickets": [],
+  "comments": []
+}
