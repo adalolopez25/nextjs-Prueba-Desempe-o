@@ -4,8 +4,8 @@ import { authService } from "@/lib/services/authService";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { email, password } = body;
-    const result = await authService.login(email, password);
+    const { name, email, password, role } = body;
+    const result = await authService.register(name, email, password, role);
     
     if (result.success && result.data?.token) {
       const response = NextResponse.json(result);
@@ -20,6 +20,6 @@ export async function POST(req: NextRequest) {
     
     return NextResponse.json(result);
   } catch (err) {
-    return NextResponse.json({ success: false, message: "Error logging in" });
+    return NextResponse.json({ success: false, message: "Error registering user" });
   }
 }

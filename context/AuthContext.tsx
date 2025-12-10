@@ -1,10 +1,13 @@
-"use client"
-import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import { User } from '@/types';
+"use client";
+import React, { createContext, useState, useContext, ReactNode } from "react";
+
+interface User { id: string; name: string; email: string; role: string; }
 
 interface AuthContextType {
   user: User | null;
+  token: string | null;
   login: (email: string, password: string) => Promise<boolean>;
+  register: (name: string, email: string, password: string, role: "client" | "agent") => Promise<boolean>;
   logout: () => void;
 }
 
@@ -12,69 +15,52 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
-  useEffect(() => {
-    console.log('AuthProvider: Checking localStorage for user');
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      try {
-        console.log('AuthProvider: Found saved user', savedUser);
-        setUser(JSON.parse(savedUser));
-      } catch (error) {
-        console.error('AuthProvider: Error parsing saved user', error);
-        localStorage.removeItem('user');
-      }
-    }
-  }, []);
-
-  const login = async (email: string, password: string): Promise<boolean> => {
-    console.log('AuthContext: Login attempt started', { email, password });
-    
+  const login = async (email: string, password: string) => {
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({ email, password })
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
-      
-      console.log('AuthContext: Login response status', response.status);
-      console.log('AuthContext: Login response ok', response.ok);
-      
-      if (response.ok) {
-        const result = await response.json();
-        console.log('AuthContext: Login response data', result);
-        
-        if (result.success && result.data) {
-          console.log('AuthContext: Login successful, setting user', result.data);
-          setUser(result.data);
-          localStorage.setItem('user', JSON.stringify(result.data));
-          return true;
-        } else {
-          console.log('AuthContext: Login failed - result not successful', result);
-        }
-      } else {
-        console.log('AuthContext: Login failed - response not ok', response.status);
-        const errorText = await response.text();
-        console.log('AuthContext: Error response text', errorText);
+      const data = await res.json();
+      if (data.success) {
+        setUser(data.data.user);
+        setToken(data.data.token);
+        return true;
       }
       return false;
-    } catch (error) {
-      console.error('AuthContext: Login fetch error:', error);
+    } catch (err) {
+      console.error(err);
       return false;
     }
   };
 
-  const logout = () => {
-    console.log('AuthContext: Logout called');
-    setUser(null);
-    localStorage.removeItem('user');
+  const register = async (name: string, email: string, password: string, role: "client" | "agent") => {
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password, role }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setUser(data.data.user);
+        setToken(data.data.token);
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
   };
+
+  const logout = () => { setUser(null); setToken(null); };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, token, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
@@ -82,8 +68,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error("useAuth must be used within AuthProvider");
   return context;
 };

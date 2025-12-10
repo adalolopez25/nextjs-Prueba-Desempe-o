@@ -1,156 +1,212 @@
-"use client"
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
-import Card from '@/components/Card';
-import Button from '@/components/Button';
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import "./login.css";
 
 export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, register } = useAuth();
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('LoginPage: Form submitted', { email, password });
-    
-    setError('');
+    setError("");
     setLoading(true);
 
     const success = await login(email, password);
-    console.log('LoginPage: Login result', success);
-
     if (success) {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      console.log('LoginPage: User from localStorage', user);
-      
-      if (user.role === 'client') {
-        console.log('LoginPage: Redirecting to client dashboard');
-        router.push('/dashboard/client');
-      } else {
-        console.log('LoginPage: Redirecting to agent dashboard');
-        router.push('/dashboard/agent');
-      }
+      setTimeout(() => {
+        router.push("/dashboard/client");
+      }, 500);
     } else {
-      console.log('LoginPage: Login failed, showing error');
-      setError('Invalid email or password');
+      setError("Email o contraseña incorrectos");
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
-  // Agrega un botón de prueba
-  const testLogin = async (testEmail: string, testPassword: string) => {
-    console.log('LoginPage: Test login with', { testEmail, testPassword });
-    setEmail(testEmail);
-    setPassword(testPassword);
-    
-    setError('');
+  const testLogin = async (role: "client" | "agent") => {
     setLoading(true);
-    
-    const success = await login(testEmail, testPassword);
-    console.log('LoginPage: Test login result', success);
-    
-    if (success) {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      if (user.role === 'client') {
-        router.push('/dashboard/client');
-      } else {
-        router.push('/dashboard/agent');
+    setError("");
+    try {
+      const testEmail = role === "client" ? "client@example.com" : "agent@example.com";
+      const testPassword = "123456";
+
+      // Intenta login primero
+      let loginSuccess = await login(testEmail, testPassword);
+
+      // Si no funciona, intenta registrar (en caso de que sea la primera vez)
+      if (!loginSuccess) {
+        const registerSuccess = await register(
+          role === "client" ? "Client Test" : "Agent Test",
+          testEmail,
+          testPassword,
+          role
+        );
+
+        if (registerSuccess) {
+          loginSuccess = await login(testEmail, testPassword);
+        }
       }
-    } else {
-      setError('Test login failed - check console for details');
+
+      if (loginSuccess) {
+        setTimeout(() => {
+          router.push(role === "client" ? "/dashboard/client" : "/dashboard/agent");
+        }, 500);
+        return;
+      }
+
+      setError("Error al iniciar sesión. Verifica tu conexión.");
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+      setError("Error procesando datos. Intenta de nuevo.");
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-gray-100">
-      <Card className="w-full max-w-md p-8">
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-2">HelpDeskPro</h1>
-        <p className="text-center text-gray-600 mb-8">Support Ticket System</p>
-        
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
+    <div className="login-container">
+      {/* Animated background blobs */}
+      <div className="blob blob1"></div>
+      <div className="blob blob2"></div>
+      <div className="blob blob3"></div>
+
+      <div className="login-card">
+        {/* Header */}
+        <h1 className="login-title">HelpDeskPro</h1>
+        <p className="login-subtitle">SOPORTE PROFESIONAL</p>
+
+        {/* Form */}
+        <form onSubmit={handleLogin}>
+          <div className="form-group">
             <input
               type="email"
+              placeholder="tu@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="form-input"
               required
+              disabled={loading}
             />
           </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
+
+          <div className="form-group">
             <input
               type="password"
+              placeholder="Contraseña"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="form-input"
               required
+              disabled={loading}
             />
           </div>
-          
-          {error && (
-            <div className="text-red-600 text-sm text-center p-2 bg-red-50 rounded-md">
-              {error}
-            </div>
-          )}
-          
-          <Button
-            type="submit"
+
+          {error && <div className="error-message">⚠️ {error}</div>}
+
+          <button 
+            type="submit" 
+            className="btn btn-primary"
             disabled={loading}
-            className="w-full"
+            style={{ opacity: loading ? 0.6 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
           >
-            {loading ? 'Signing in...' : 'Sign In'}
-          </Button>
+            {loading ? '⏳ Autenticando...' : '🔐 Acceder'}
+          </button>
         </form>
-        
-        {/* Botones de prueba */}
-        <div className="mt-6 space-y-2">
-          <Button
-            type="button"
-            variant="secondary"
-            className="w-full text-sm"
-            onClick={() => testLogin('cliente@example.com', 'cliente123')}
-          >
-            Test Login as Client
-          </Button>
-          
-          <Button
-            type="button"
-            variant="secondary"
-            className="w-full text-sm"
-            onClick={() => testLogin('agente@example.com', 'agente123')}
-          >
-            Test Login as Agent
-          </Button>
+
+        {/* Divider */}
+        <div className="divider">
+          <span>O prueba con</span>
         </div>
-        
-        <div className="mt-6 text-center text-sm text-gray-600">
-          <p className="font-medium mb-2">Demo credentials:</p>
-          <div className="bg-gray-50 p-3 rounded-md">
-            <div className="mb-1">
-              <span className="font-semibold">Client:</span> 
-              <span className="ml-2">cliente@example.com / cliente123</span>
-            </div>
-            <div>
-              <span className="font-semibold">Agent:</span> 
-              <span className="ml-2">agente@example.com / agente123</span>
-            </div>
+
+        {/* Demo Buttons */}
+        <div className="demo-buttons">
+          <button
+            onClick={() => testLogin("client")}
+            className="btn btn-success"
+            disabled={loading}
+            style={{ opacity: loading ? 0.6 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
+          >
+            {loading ? '⏳ Cargando...' : '👤 Cliente Demo'}
+          </button>
+          <button
+            onClick={() => testLogin("agent")}
+            className="btn btn-primary"
+            disabled={loading}
+            style={{ opacity: loading ? 0.6 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
+          >
+            {loading ? '⏳ Cargando...' : '🔧 Agente Demo'}
+          </button>
+        </div>
+
+        {/* Footer */}
+        <p className="footer-text">
+          Cliente: client@example.com | Agente: agent@example.com
+        </p>
+
+        {/* Register Link */}
+        <div style={{ marginTop: '24px', textAlign: 'center', paddingTop: '24px', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
+          <p style={{ color: '#cbd5e1', fontSize: '12px', margin: '0 0 12px 0' }}>
+            ¿No tienes cuenta?
+          </p>
+          <button
+            onClick={() => router.push('/register')}
+            className="btn btn-secondary"
+            style={{ width: '100%' }}
+            disabled={loading}
+          >
+            📝 Crear una Nueva Cuenta
+          </button>
+        </div>
+      </div>
+
+      {/* Loading Overlay */}
+      {loading && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.7)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(147, 51, 234, 0.2))',
+            border: '2px solid rgba(59, 130, 246, 0.5)',
+            borderRadius: '16px',
+            padding: '32px',
+            textAlign: 'center',
+            backdropFilter: 'blur(10px)'
+          }}>
+            <div style={{
+              fontSize: '48px',
+              marginBottom: '16px',
+              animation: 'spin 1s linear infinite'
+            }}>⏳</div>
+            <p style={{ color: 'white', fontWeight: '600', fontSize: '18px', margin: 0 }}>
+              Iniciando sesión...
+            </p>
+            <p style={{ color: '#cbd5e1', fontSize: '12px', marginTop: '8px', margin: '8px 0 0 0' }}>
+              Por favor espera un momento
+            </p>
           </div>
         </div>
-      </Card>
+      )}
+
+      <style jsx>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }

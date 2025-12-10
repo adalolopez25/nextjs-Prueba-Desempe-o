@@ -1,25 +1,17 @@
-// app/api/comments/route.ts
+// app/api/comments/[ticketId]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
 
-export async function GET(req: NextRequest) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { ticketId: string } }
+) {
   try {
-    const url = new URL(req.url);
-    const ticketId = url.searchParams.get("ticketId");
-
-    let comments;
-
-    if (ticketId) {
-      comments = await prisma.comment.findMany({
-        where: { ticketId },
-        include: { user: true },
-      });
-    } else {
-      comments = await prisma.comment.findMany({
-        include: { user: true },
-      });
-    }
+    const comments = await prisma.comment.findMany({
+      where: { ticketId: params.ticketId },
+      include: { user: true },
+    });
 
     return NextResponse.json({ success: true, data: comments });
   } catch (err) {
@@ -31,22 +23,25 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(
+  req: NextRequest,
+  { params }: { params: { ticketId: string } }
+) {
   const user = await getAuthUser();
-  if (!user) {
+
+  if (!user)
     return NextResponse.json({ success: false, error: "No autenticado" }, { status: 401 });
-  }
 
   try {
-    const { ticketId, message } = await req.json();
-    if (!ticketId || !message) {
-      return NextResponse.json({ success: false, error: "Faltan datos" }, { status: 400 });
-    }
+    const { message } = await req.json();
+
+    if (!message)
+      return NextResponse.json({ success: false, error: "El mensaje es obligatorio" }, { status: 400 });
 
     const newComment = await prisma.comment.create({
       data: {
         content: message,
-        ticketId,
+        ticketId: params.ticketId,
         userId: user.id,
       },
       include: { user: true },
@@ -54,7 +49,7 @@ export async function POST(req: NextRequest) {
 
     console.log("Comentario agregado:", newComment.id);
 
-    return NextResponse.json({ success: true, data: newComment });
+    return NextResponse.json({ success: true, data: newComment }, { status: 201 });
   } catch (err) {
     console.error(err);
     return NextResponse.json(
