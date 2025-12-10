@@ -2,20 +2,20 @@
 
 A modern Next.js application for managing technical support tickets with role-based access (client and agent), built with Prisma ORM and PostgreSQL.
 
-## 🌟 Features
+##  Features
 
-- ✅ User authentication with JWT and secure HTTP-only cookies
-- ✅ Complete ticket management (CRUD operations)
-- ✅ Real-time comment system on tickets
-- ✅ Role-based dashboards (Client/Agent)
-- ✅ Ticket status tracking (Open, In Progress, Resolved, Closed)
-- ✅ Priority levels (Low, Medium, High)
-- ✅ Protected routes by authentication
-- ✅ Responsive UI with Tailwind CSS v4
-- ✅ Smooth animations with Framer Motion
-- ✅ Type-safe development with TypeScript
+-  User authentication with JWT and secure HTTP-only cookies
+-  Complete ticket management (CRUD operations)
+-  Real-time comment system on tickets
+-  Role-based dashboards (Client/Agent)
+-  Ticket status tracking (Open, In Progress, Resolved, Closed)
+-  Priority levels (Low, Medium, High)
+-  Protected routes by authentication
+-  Responsive UI with Tailwind CSS v4
+-  Smooth animations with Framer Motion
+-  Type-safe development with TypeScript
 
-## 📋 Requirements
+##  Requirements
 
 - **Node.js**: 18 or higher
 - **PostgreSQL**: 12 or higher
@@ -23,7 +23,7 @@ A modern Next.js application for managing technical support tickets with role-ba
 
 ---
 
-## 🚀 Quick Start (5 Minutes)
+##  Quick Start (5 Minutes)
 
 ### Step 1: Create PostgreSQL Database
 
@@ -75,7 +75,7 @@ Open your browser: **http://localhost:3000**
 
 ---
 
-## 📖 Detailed Setup Guide
+##  Detailed Setup Guide
 
 ### Installation Steps
 
@@ -180,7 +180,7 @@ npm run dev
 
 ---
 
-## 🛠️ Available Scripts
+##  Available Scripts
 
 
 # Development
@@ -257,7 +257,7 @@ public/                            # Static files
 
 ---
 
-## 🗄️ Database Schema
+##  Database Schema
 
 ### User Model
 ```typescript
@@ -662,9 +662,6 @@ MIT License - Feel free to use this project for personal or commercial purposes.
 
 ## 👨‍💻 Author
 
-Developed with ❤️ as a modern example of Next.js + Prisma + PostgreSQL integration.
+Developed with Andres Armenta as a modern example of Next.js + Prisma + PostgreSQL integration.
 
 ---
-
-**Last Updated**: December 2024  
-**Status**: Production Ready ✅
