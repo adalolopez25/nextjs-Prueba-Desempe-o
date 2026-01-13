@@ -3,6 +3,7 @@ import prisma from "../prisma";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+// IMPORTANTE: Usa "secret" en todos los archivos o configúralo en el .env
 const JWT_SECRET = process.env.JWT_SECRET || "secret";
 
 export const authService = {
@@ -10,10 +11,23 @@ export const authService = {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) return { success: false, message: "User not found" };
 
-    const valid = await bcrypt.compare(password, user.password);
+    // Validación dual (Bcrypt o Texto Plano para tus pruebas manuales)
+    let valid = false;
+    if (user.password.startsWith("$2")) {
+      valid = await bcrypt.compare(password, user.password);
+    } else {
+      valid = password === user.password;
+    }
+    
     if (!valid) return { success: false, message: "Invalid password" };
 
-    const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: "1h" });
+    // ARREGLO: Agregamos el EMAIL al token porque lib/auth.ts lo requiere
+    const token = jwt.sign(
+      { id: user.id, role: user.role, email: user.email }, 
+      JWT_SECRET, 
+      { expiresIn: "2h" }
+    );
+
     return { success: true, data: { user, token } };
   },
 
@@ -26,7 +40,13 @@ export const authService = {
       data: { name, email, password: hashed, role },
     });
 
-    const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: "1h" });
+    // ARREGLO: Agregamos el EMAIL aquí también
+    const token = jwt.sign(
+      { id: user.id, role: user.role, email: user.email }, 
+      JWT_SECRET, 
+      { expiresIn: "2h" }
+    );
+
     return { success: true, data: { user, token } };
   },
 };

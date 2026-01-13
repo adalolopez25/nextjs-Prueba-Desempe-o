@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import "../login.css";
 
 export default function Register() {
   const [name, setName] = useState("");
@@ -12,6 +11,7 @@ export default function Register() {
   const [role, setRole] = useState<"client" | "agent">("client");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  
   const router = useRouter();
   const { register } = useAuth();
 
@@ -31,6 +31,7 @@ export default function Register() {
 
     setLoading(true);
     const success = await register(name, email, password, role);
+    
     if (success) {
       setTimeout(() => {
         router.push("/dashboard/" + role);
@@ -42,170 +43,129 @@ export default function Register() {
   };
 
   return (
-    <div className="login-container">
-      {/* Animated background blobs */}
-      <div className="blob blob1"></div>
-      <div className="blob blob2"></div>
-      <div className="blob blob3"></div>
+    <div className="relative min-h-screen w-full flex items-center justify-center bg-slate-950 overflow-hidden py-12 px-4">
+      {/* Background Blobs Animados con Tailwind */}
+      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-indigo-600/20 rounded-full blur-[120px] animate-pulse"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px]"></div>
 
-      <div className="login-card">
+      <div className="relative z-10 w-full max-w-lg p-8 bg-slate-900/40 border border-slate-800 backdrop-blur-2xl rounded-3xl shadow-2xl">
         {/* Header */}
-        <h1 className="login-title">Crear Cuenta</h1>
-        <p className="login-subtitle">ÚNETE A HELPDESKPRO</p>
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-extrabold text-white tracking-tight">Crear Cuenta</h1>
+          <p className="text-indigo-500 text-xs font-bold tracking-[0.2em] uppercase mt-2">
+            Únete a HelpDeskPro
+          </p>
+        </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#cbd5e1', marginBottom: '8px' }}>
-              Nombre Completo
-            </label>
-            <input
-              type="text"
-              placeholder="Tu nombre completo"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="form-input"
-              required
-              disabled={loading}
-            />
+        {/* Formulario */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-slate-400 ml-1">Nombre Completo</label>
+              <input
+                type="text"
+                placeholder="Tu nombre"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full p-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                required
+                disabled={loading}
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-slate-400 ml-1">Email</label>
+              <input
+                type="email"
+                placeholder="tu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full p-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                required
+                disabled={loading}
+              />
+            </div>
           </div>
 
-          <div className="form-group">
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#cbd5e1', marginBottom: '8px' }}>
-              Email
-            </label>
-            <input
-              type="email"
-              placeholder="tu@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="form-input"
-              required
-              disabled={loading}
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-slate-400 ml-1">Contraseña</label>
+              <input
+                type="password"
+                placeholder="Mínimo 6 caracteres"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full p-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                required
+                disabled={loading}
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-slate-400 ml-1">Confirmar</label>
+              <input
+                type="password"
+                placeholder="Repite contraseña"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full p-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                required
+                disabled={loading}
+              />
+            </div>
           </div>
 
-          <div className="form-group">
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#cbd5e1', marginBottom: '8px' }}>
-              Contraseña
-            </label>
-            <input
-              type="password"
-              placeholder="Mínimo 6 caracteres"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="form-input"
-              required
-              disabled={loading}
-            />
-          </div>
-
-          <div className="form-group">
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#cbd5e1', marginBottom: '8px' }}>
-              Confirmar Contraseña
-            </label>
-            <input
-              type="password"
-              placeholder="Repite tu contraseña"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="form-input"
-              required
-              disabled={loading}
-            />
-          </div>
-
-          <div className="form-group">
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#cbd5e1', marginBottom: '8px' }}>
-              Tipo de Cuenta
-            </label>
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-slate-400 ml-1">Tipo de Cuenta</label>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value as "client" | "agent")}
-              className="form-input"
+              className="w-full p-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white outline-none focus:ring-2 focus:ring-indigo-500 transition-all appearance-none cursor-pointer"
               disabled={loading}
-              style={{ cursor: loading ? 'not-allowed' : 'pointer' }}
             >
-              <option value="client">👤 Cliente - Crear solicitudes de soporte</option>
-              <option value="agent">🔧 Agente - Resolver tickets</option>
+              <option value="client" className="bg-slate-900">Cliente - Crear tickets</option>
+              <option value="agent" className="bg-slate-900">Agente - Resolver tickets</option>
             </select>
           </div>
 
-          {error && <div className="error-message">⚠️ {error}</div>}
+          {error && (
+            <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold rounded-xl text-center">
+              {error}
+            </div>
+          )}
 
           <button 
             type="submit" 
-            className="btn btn-primary"
             disabled={loading}
-            style={{ opacity: loading ? 0.6 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
+            className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/20 transition-all active:scale-[0.98] disabled:opacity-50 mt-4"
           >
-            {loading ? '⏳ Registrando...' : '✨ Crear Cuenta'}
+            {loading ? 'Procesando...' : 'Crear Cuenta'}
           </button>
         </form>
 
-        {/* Divider */}
-        <div className="divider">
-          <span>O vuelve al</span>
+        <div className="relative my-8">
+          <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-800"></div></div>
+          <div className="relative flex justify-center text-xs uppercase"><span className="bg-slate-900/40 px-2 text-slate-500 backdrop-blur-xl">O vuelve al</span></div>
         </div>
 
-        {/* Login Link */}
         <button
           onClick={() => router.push('/')}
-          className="btn btn-secondary"
-          style={{ width: '100%' }}
+          className="w-full py-3 bg-transparent border border-slate-700 hover:bg-slate-800/50 text-slate-300 font-semibold rounded-xl transition-all text-sm"
         >
-          🔐 Iniciar Sesión
+          Iniciar Sesión
         </button>
-
-        {/* Footer */}
-        <p className="footer-text">
-          ¿Ya tienes cuenta? Haz clic arriba para entrar
-        </p>
       </div>
 
       {/* Loading Overlay */}
       {loading && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.7)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 9999
-        }}>
-          <div style={{
-            background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(147, 51, 234, 0.2))',
-            border: '2px solid rgba(59, 130, 246, 0.5)',
-            borderRadius: '16px',
-            padding: '32px',
-            textAlign: 'center',
-            backdropFilter: 'blur(10px)'
-          }}>
-            <div style={{
-              fontSize: '48px',
-              marginBottom: '16px',
-              animation: 'spin 1s linear infinite'
-            }}>✨</div>
-            <p style={{ color: 'white', fontWeight: '600', fontSize: '18px', margin: 0 }}>
-              Creando tu cuenta...
-            </p>
-            <p style={{ color: '#cbd5e1', fontSize: '12px', marginTop: '8px', margin: '8px 0 0 0' }}>
-              Por favor espera un momento
-            </p>
+        <div className="fixed inset-0 z-[99] bg-slate-950/70 backdrop-blur-md flex items-center justify-center animate-in fade-in duration-300">
+          <div className="bg-slate-900 border border-slate-800 p-8 rounded-3xl text-center shadow-2xl">
+            <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-white font-bold text-lg">Creando tu cuenta</p>
+            <p className="text-slate-500 text-xs mt-1">Configurando tu perfil de {role === "agent" ? "Agente" : "Cliente"}...</p>
           </div>
         </div>
       )}
-
-      <style jsx>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 }

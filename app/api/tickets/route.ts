@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth"; // función que obtiene el usuario desde el token
 
 export async function GET() {
-  const user = await getAuthUser(); // ✅ await aquí
+  const user = await getAuthUser(); // 
   if (!user)
     return NextResponse.json({ success: false, error: "No autenticado" }, { status: 401 });
 
@@ -22,7 +22,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const user = await getAuthUser(); // ✅ await aquí también
+  const user = await getAuthUser(); //  await aquí también
   if (!user)
     return NextResponse.json({ success: false, error: "No autenticado" }, { status: 401 });
 

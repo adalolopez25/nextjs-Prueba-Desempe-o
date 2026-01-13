@@ -1,11 +1,10 @@
-'use client';
-import { useAuth } from '@/context/AuthContext';
-import { useRouter } from 'next/navigation';
-import ProtectedRoute from '@/components/layout/ProtectedRoute';
-import Header from '@/components/layout/Header';
-import { useState, useEffect } from 'react';
-import { Ticket } from '@/types';
-import '../dashboard.css';
+"use client";
+import { useAuth } from "@/context/AuthContext";
+import ProtectedRoute from "@/components/layout/ProtectedRoute";
+import Header from "@/components/layout/Header";
+import { useState, useEffect } from "react";
+import { Ticket } from "@/types";
+import { useRouter } from "next/navigation";
 
 export default function ClientDashboard() {
   const { user } = useAuth();
@@ -19,184 +18,104 @@ export default function ClientDashboard() {
 
   const fetchTickets = async () => {
     try {
-      const res = await fetch('/api/tickets');
+      const res = await fetch("/api/tickets");
       const data = await res.json();
       if (data.success) setTickets(data.data);
     } catch (err) {
-      console.error(err);
+      console.error("Error fetching tickets:", err);
     } finally {
       setLoading(false);
     }
   };
 
+  // --- COMPONENTES DE ESTILO ---
+  const Badge = ({ children, colorClass }: { children: React.ReactNode; colorClass: string }) => (
+    <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter border ${colorClass}`}>
+      {children}
+    </span>
+  );
+
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'open':
-        return <span className="badge badge-primary">Abierto</span>;
-      case 'in_progress':
-        return <span className="badge badge-warning">En Progreso</span>;
-      case 'resolved':
-        return <span className="badge badge-success">Resuelto</span>;
-      case 'closed':
-        return <span className="badge badge-danger">Cerrado</span>;
-      default:
-        return <span className="badge badge-primary">{status}</span>;
+      case "open": return <Badge colorClass="bg-blue-500/10 text-blue-400 border-blue-500/20">Open</Badge>;
+      case "in_progress": return <Badge colorClass="bg-amber-500/10 text-amber-400 border-amber-500/20">In Progress</Badge>;
+      case "resolved": return <Badge colorClass="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">Resolved</Badge>;
+      case "closed": return <Badge colorClass="bg-slate-500/10 text-slate-400 border-slate-500/20">Closed</Badge>;
+      default: return <Badge colorClass="bg-indigo-500/10 text-indigo-400 border-indigo-500/20">{status}</Badge>;
     }
   };
 
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
-      case 'low':
-        return <span className="badge badge-primary">Baja</span>;
-      case 'medium':
-        return <span className="badge badge-warning">Media</span>;
-      case 'high':
-        return <span className="badge badge-danger">Alta</span>;
-      default:
-        return <span className="badge badge-primary">{priority}</span>;
+      case "high": return <Badge colorClass="bg-red-500/20 text-red-400 border-red-500/30 font-black">High</Badge>;
+      case "medium": return <Badge colorClass="bg-orange-500/10 text-orange-400 border-orange-500/20">Medium</Badge>;
+      default: return <Badge colorClass="bg-slate-800 text-slate-400 border-slate-700">Low</Badge>;
     }
   };
 
-  if (loading) {
-    return (
-      <ProtectedRoute allowedRoles={['client']}>
-        <div className="dashboard-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{
-            textAlign: 'center',
-            background: 'rgba(15, 23, 42, 0.8)',
-            backdropFilter: 'blur(10px)',
-            border: '2px solid rgba(59, 130, 246, 0.5)',
-            borderRadius: '16px',
-            padding: '48px',
-            zIndex: 50
-          }}>
-            <div style={{
-              fontSize: '64px',
-              marginBottom: '24px',
-              animation: 'spin 2s linear infinite'
-            }}>✨</div>
-            <h2 style={{ color: 'white', fontSize: '24px', fontWeight: '700', margin: '0 0 8px 0' }}>
-              Bienvenido a HelpDeskPro
-            </h2>
-            <p style={{ color: '#cbd5e1', fontSize: '14px', margin: '0 0 24px 0' }}>
-              Preparando tu dashboard...
-            </p>
-            <div style={{
-              width: '200px',
-              height: '4px',
-              background: 'rgba(255, 255, 255, 0.1)',
-              borderRadius: '2px',
-              overflow: 'hidden',
-              margin: '0 auto'
-            }}>
-              <div style={{
-                height: '100%',
-                background: 'linear-gradient(90deg, rgb(37, 99, 235), rgb(168, 85, 247))',
-                animation: 'progress 2s ease-in-out infinite'
-              }}></div>
-            </div>
-          </div>
-
-          <style jsx>{`
-            @keyframes spin {
-              from { transform: rotate(0deg); }
-              to { transform: rotate(360deg); }
-            }
-            @keyframes progress {
-              0% { width: 0%; }
-              50% { width: 100%; }
-              100% { width: 0%; }
-            }
-          `}</style>
-        </div>
-      </ProtectedRoute>
-    );
-  }
+  if (loading) return (
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  );
 
   return (
-    <ProtectedRoute allowedRoles={['client']}>
-      <div className="dashboard-container">
+    <ProtectedRoute allowedRoles={["client"]}>
+      <div className="min-h-screen bg-slate-950 text-slate-200 pb-20">
         <Header />
         
-        {/* Welcome Message */}
-        <div style={{
-          background: 'linear-gradient(90deg, rgba(37, 99, 235, 0.1), rgba(168, 85, 247, 0.1))',
-          border: '1px solid rgba(59, 130, 246, 0.3)',
-          borderRadius: '12px',
-          padding: '20px',
-          margin: '24px 24px 0 24px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '16px',
-          animation: 'slideIn 0.5s ease-out'
-        }}>
-          <div style={{ fontSize: '32px' }}>👋</div>
-          <div>
-            <h3 style={{ color: 'white', fontSize: '18px', fontWeight: '700', margin: '0 0 4px 0' }}>
-              ¡Hola, {user?.name}!
-            </h3>
-            <p style={{ color: '#cbd5e1', fontSize: '12px', margin: 0 }}>
-              Bienvenido a tu panel de control. Aquí puedes gestionar todos tus tickets de soporte.
-            </p>
+        <div className="max-w-7xl mx-auto px-6 mt-10">
+          {/* Welcome Section */}
+          <div className="mb-10 p-8 bg-slate-900/40 border border-slate-800 rounded-3xl flex flex-col md:flex-row justify-between items-center gap-6">
+            <div>
+              <h3 className="text-white text-2xl font-black tracking-tight">Hello, {user?.name}</h3>
+              <p className="text-slate-400 text-sm">Here is the current status of your support requests.</p>
+            </div>
+            
+            <button
+              onClick={() => router.push("/tickets/new")}
+              className="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl shadow-lg transition-all"
+            >
+              + Create New Ticket
+            </button>
           </div>
-        </div>
 
-        <div style={{ padding: '24px' }}>
+          {/* Tickets Grid (No clickable items) */}
           {tickets.length === 0 ? (
-            <div className="dashboard-card" style={{ textAlign: 'center', padding: '48px 24px' }}>
-              <div className="empty-icon">📭</div>
-              <h2 className="empty-title">No tienes tickets aún</h2>
-              <p className="empty-text">Crea tu primer ticket para solicitar soporte</p>
-              <button
-                onClick={() => router.push('/tickets/new')}
-                className="btn btn-primary"
-                style={{ marginTop: '24px' }}
-              >
-                ➕ Crear Primer Ticket
-              </button>
+            <div className="text-center py-20 bg-slate-900/20 rounded-3xl border-2 border-dashed border-slate-800">
+              <p className="text-slate-500 italic">No tickets found in your history.</p>
             </div>
           ) : (
-            <div className="dashboard-grid">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {tickets.map((ticket) => (
                 <div
                   key={ticket.id}
-                  className="dashboard-card fade-in"
-                  onClick={() => router.push(`/tickets/${ticket.id}`)}
+                  className="bg-slate-900/40 border border-slate-800/50 rounded-2xl p-6 flex flex-col justify-between"
                 >
-                  <div style={{ marginBottom: '16px' }}>
-                    <h3 className="card-title">{ticket.title}</h3>
-                    <p className="card-description">
-                      📅 {new Date(ticket.createdAt).toLocaleDateString('es-ES')}
+                  <div>
+                    <div className="flex gap-2 mb-4">
+                      {getStatusBadge(ticket.status)}
+                      {getPriorityBadge(ticket.priority)}
+                    </div>
+                    
+                    <h3 className="text-white font-bold text-lg mb-2">
+                      {ticket.title}
+                    </h3>
+                    
+                    <p className="text-slate-400 text-sm leading-relaxed line-clamp-3 mb-6">
+                      {ticket.description}
                     </p>
                   </div>
                   
-                  <p className="card-description" style={{ marginBottom: '16px', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', minHeight: '2.5rem' }}>
-                    {ticket.description}
-                  </p>
-                  
-                  <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
-                    {getStatusBadge(ticket.status)}
-                    {getPriorityBadge(ticket.priority)}
+                  <div className="pt-4 border-t border-slate-800/50 flex items-center justify-between text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                    <span>Created on</span>
+                    <span>{new Date(ticket.createdAt).toLocaleDateString()}</span>
                   </div>
-                  
-                  <button
-                    onClick={(e: React.MouseEvent) => {
-                      e.stopPropagation();
-                      router.push(`/tickets/${ticket.id}`);
-                    }}
-                    className="btn btn-secondary"
-                    style={{ width: '100%' }}
-                  >
-                    Ver Detalles →
-                  </button>
                 </div>
               ))}
             </div>
           )}
         </div>
-
-        <div style={{ position: 'absolute', top: '100px', left: '50px', width: '288px', height: '288px', background: 'rgba(37, 99, 235, 0.1)', borderRadius: '50%', filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0 }}></div>
-        <div style={{ position: 'absolute', bottom: '200px', right: '50px', width: '288px', height: '288px', background: 'rgba(147, 51, 234, 0.1)', borderRadius: '50%', filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0 }}></div>
       </div>
     </ProtectedRoute>
   );

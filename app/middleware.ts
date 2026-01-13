@@ -1,36 +1,38 @@
-import { NextRequest, NextResponse } from "next/server";
-import { verifyJwt } from "@/lib/auth";
-
-const PROTECTED_API = ["/api/tickets", "/api/comments"];
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+  const session = req.cookies.get("session")?.value;
+  const role = req.cookies.get("userRole")?.value;
 
-  const isProtected = PROTECTED_API.some((p) => pathname.startsWith(p));
+  // RUTAS PROTEGIDAS (Cualquier cosa que empiece por estas carpetas)
+  const isProtectedRoute = pathname.startsWith("/dashboard") || 
+                           pathname.startsWith("/tickets") || 
+                           pathname.startsWith("/client");
 
-  if (!isProtected) return NextResponse.next();
-
-  const token = req.cookies.get("token")?.value;
-
-  if (!token) {
-    return NextResponse.json(
-      { success: false, error: "No autenticado" },
-      { status: 401 }
-    );
+  // 1. SI NO HAY SESIÓN:
+  if (!session) {
+    // Si intenta entrar a una ruta protegida, mandarlo al login (/)
+    if (isProtectedRoute) {
+      return NextResponse.redirect(new URL("/", req.url));
+    }
+    // Si va a "/", dejarlo pasar para que vea el Login
+    return NextResponse.next();
   }
 
-  const decoded = verifyJwt(token);
-
-  if (!decoded) {
-    return NextResponse.json(
-      { success: false, error: "Token inválido" },
-      { status: 401 }
-    );
+  // 2. SI HAY SESIÓN:
+  if (session) {
+    // Si intenta ir al login (/) o /register, mandarlo a su dashboard según su rol
+    if (pathname === "/" || pathname === "/register") {
+      const target = role === "agent" ? "/dashboard/agent" : "/dashboard/client";
+      return NextResponse.redirect(new URL(target, req.url));
+    }
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/api/:path*"],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };

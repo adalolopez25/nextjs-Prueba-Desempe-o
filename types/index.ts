@@ -1,38 +1,34 @@
-export type UserRole = 'client' | 'agent';
+export type TicketStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
+export type TicketPriority = 'low' | 'medium' | 'high';
 
 export interface User {
   id: string;
   name: string;
   email: string;
-  role: UserRole;
-  password: string;
+  role: 'agent' | 'client';
 }
-
-export type TicketStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
-export type TicketPriority = 'low' | 'medium' | 'high';
 
 export interface Ticket {
   id: string;
   title: string;
   description: string;
-  createdBy: string;
-  assignedTo?: string;
   status: TicketStatus;
   priority: TicketPriority;
+  userId: string;
   createdAt: string;
-  updatedAt: string;
+  user?: {
+    name: string;
+    email: string;
+  };
 }
 
 export interface Comment {
   id: string;
+  content: string;
+  userId: string;
   ticketId: string;
-  author: string;
-  message: string;
   createdAt: string;
-}
-
-export interface ApiResponse<T = any> {
-  success: boolean;
-  data?: T;
-  error?: string;
+  user?: {
+    name: string;
+  };
 }

@@ -1,212 +1,119 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import "./login.css";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { login, register } = useAuth();
+  const [mounted, setMounted] = useState(false); // Nueva protección para Next.js
+
+  const { login, user } = useAuth();
   const router = useRouter();
+
+  // Evita errores de hidratación (SSR vs Client)
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    const success = await login(email, password);
-    if (success) {
-      setTimeout(() => {
-        router.push("/dashboard/client");
-      }, 500);
-    } else {
-      setError("Email o contraseña incorrectos");
-      setLoading(false);
-    }
-  };
-
-  const testLogin = async (role: "client" | "agent") => {
-    setLoading(true);
-    setError("");
     try {
-      const testEmail = role === "client" ? "client@example.com" : "agent@example.com";
-      const testPassword = "123456";
+      const success = await login(email, password);
+      
+      if (success) {
+        // Obtenemos el usuario del localStorage DE FORMA SEGURA
+        const stored = localStorage.getItem("user");
+        const userData = stored ? JSON.parse(stored) : null;
+        
+        const target = userData?.role === "agent" 
+          ? "/dashboard/agent" 
+          : "/dashboard/client";
 
-      // Intenta login primero
-      let loginSuccess = await login(testEmail, testPassword);
-
-      // Si no funciona, intenta registrar (en caso de que sea la primera vez)
-      if (!loginSuccess) {
-        const registerSuccess = await register(
-          role === "client" ? "Client Test" : "Agent Test",
-          testEmail,
-          testPassword,
-          role
-        );
-
-        if (registerSuccess) {
-          loginSuccess = await login(testEmail, testPassword);
-        }
+        router.push(target);
+      } else {
+        setError("Email o contraseña incorrectos");
+        setLoading(false);
       }
-
-      if (loginSuccess) {
-        setTimeout(() => {
-          router.push(role === "client" ? "/dashboard/client" : "/dashboard/agent");
-        }, 500);
-        return;
-      }
-
-      setError("Error al iniciar sesión. Verifica tu conexión.");
-      setLoading(false);
     } catch (err) {
-      console.error(err);
-      setError("Error procesando datos. Intenta de nuevo.");
+      setError("Ocurrió un error al intentar iniciar sesión");
       setLoading(false);
     }
   };
+
+  // Si el componente no ha montado en el cliente, no renderizamos nada pesado
+  if (!mounted) return <div className="min-h-screen bg-slate-950" />;
 
   return (
-    <div className="login-container">
-      {/* Animated background blobs */}
-      <div className="blob blob1"></div>
-      <div className="blob blob2"></div>
-      <div className="blob blob3"></div>
+    <div className="relative min-h-screen w-full flex items-center justify-center bg-slate-950 overflow-hidden">
+      {/* Fondo Decorativo */}
+      <div className="absolute top-[-10%] left-[-10%] w-72 h-72 bg-indigo-600/20 rounded-full blur-[120px]"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-600/10 rounded-full blur-[120px]"></div>
 
-      <div className="login-card">
-        {/* Header */}
-        <h1 className="login-title">HelpDeskPro</h1>
-        <p className="login-subtitle">SOPORTE PROFESIONAL</p>
+      <div className="relative z-10 w-full max-w-md p-8 bg-slate-900/40 border border-slate-800 backdrop-blur-2xl rounded-3xl shadow-2xl">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-extrabold text-white tracking-tight">
+            HelpDesk<span className="text-indigo-500">Pro</span>
+          </h1>
+          <p className="text-slate-500 text-xs font-bold tracking-[0.2em] uppercase mt-2">
+            Soporte Profesional
+          </p>
+        </div>
 
-        {/* Form */}
-        <form onSubmit={handleLogin}>
-          <div className="form-group">
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-slate-400 ml-1">Correo Electrónico</label>
             <input
               type="email"
-              placeholder="tu@email.com"
+              placeholder="nombre@empresa.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="form-input"
+              className="w-full p-4 bg-slate-800/50 border border-slate-700/50 rounded-2xl text-white outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
               required
-              disabled={loading}
             />
           </div>
 
-          <div className="form-group">
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-slate-400 ml-1">Contraseña</label>
             <input
               type="password"
-              placeholder="Contraseña"
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="form-input"
+              className="w-full p-4 bg-slate-800/50 border border-slate-700/50 rounded-2xl text-white outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
               required
-              disabled={loading}
             />
           </div>
 
-          {error && <div className="error-message">⚠️ {error}</div>}
+          {error && (
+            <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold rounded-xl text-center">
+              {error}
+            </div>
+          )}
 
-          <button 
-            type="submit" 
-            className="btn btn-primary"
+          <button
+            type="submit"
             disabled={loading}
-            style={{ opacity: loading ? 0.6 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
+            className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl shadow-lg transition-all active:scale-[0.98] disabled:opacity-50"
           >
-            {loading ? '⏳ Autenticando...' : '🔐 Acceder'}
+            {loading ? "Autenticando..." : "Acceder al Sistema"}
           </button>
         </form>
 
-        {/* Divider */}
-        <div className="divider">
-          <span>O prueba con</span>
-        </div>
-
-        {/* Demo Buttons */}
-        <div className="demo-buttons">
+        <div className="mt-8 pt-6 border-t border-slate-800 text-center">
           <button
-            onClick={() => testLogin("client")}
-            className="btn btn-success"
-            disabled={loading}
-            style={{ opacity: loading ? 0.6 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
+            onClick={() => router.push("/register")}
+            className="text-slate-400 hover:text-white text-sm transition-colors"
           >
-            {loading ? '⏳ Cargando...' : '👤 Cliente Demo'}
-          </button>
-          <button
-            onClick={() => testLogin("agent")}
-            className="btn btn-primary"
-            disabled={loading}
-            style={{ opacity: loading ? 0.6 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
-          >
-            {loading ? '⏳ Cargando...' : '🔧 Agente Demo'}
-          </button>
-        </div>
-
-        {/* Footer */}
-        <p className="footer-text">
-          Cliente: client@example.com | Agente: agent@example.com
-        </p>
-
-        {/* Register Link */}
-        <div style={{ marginTop: '24px', textAlign: 'center', paddingTop: '24px', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
-          <p style={{ color: '#cbd5e1', fontSize: '12px', margin: '0 0 12px 0' }}>
-            ¿No tienes cuenta?
-          </p>
-          <button
-            onClick={() => router.push('/register')}
-            className="btn btn-secondary"
-            style={{ width: '100%' }}
-            disabled={loading}
-          >
-            📝 Crear una Nueva Cuenta
+            ¿No tienes cuenta? <span className="text-indigo-500 font-bold">Regístrate</span>
           </button>
         </div>
       </div>
-
-      {/* Loading Overlay */}
-      {loading && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.7)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 9999
-        }}>
-          <div style={{
-            background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(147, 51, 234, 0.2))',
-            border: '2px solid rgba(59, 130, 246, 0.5)',
-            borderRadius: '16px',
-            padding: '32px',
-            textAlign: 'center',
-            backdropFilter: 'blur(10px)'
-          }}>
-            <div style={{
-              fontSize: '48px',
-              marginBottom: '16px',
-              animation: 'spin 1s linear infinite'
-            }}>⏳</div>
-            <p style={{ color: 'white', fontWeight: '600', fontSize: '18px', margin: 0 }}>
-              Iniciando sesión...
-            </p>
-            <p style={{ color: '#cbd5e1', fontSize: '12px', marginTop: '8px', margin: '8px 0 0 0' }}>
-              Por favor espera un momento
-            </p>
-          </div>
-        </div>
-      )}
-
-      <style jsx>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 }

@@ -1,60 +1,47 @@
-// app/api/comments/[ticketId]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { ticketId: string } }
-) {
-  try {
-    const comments = await prisma.comment.findMany({
-      where: { ticketId: params.ticketId },
-      include: { user: true },
-    });
-
-    return NextResponse.json({ success: true, data: comments });
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json(
-      { success: false, error: "Error al obtener comentarios" },
-      { status: 500 }
-    );
-  }
-}
-
 export async function POST(
   req: NextRequest,
-  { params }: { params: { ticketId: string } }
+  { params }: { params: Promise<{ ticketid: string }> }
 ) {
-  const user = await getAuthUser();
-
-  if (!user)
-    return NextResponse.json({ success: false, error: "No autenticado" }, { status: 401 });
+  // 1. Declaramos la variable fuera del try para que sea accesible en todo el scope
+  let user: any = null; 
 
   try {
+    user = await getAuthUser(); // Asignamos el valor
+    const { ticketid } = await params;
     const { message } = await req.json();
 
-    if (!message)
-      return NextResponse.json({ success: false, error: "El mensaje es obligatorio" }, { status: 400 });
+    if (!user?.id) {
+      return NextResponse.json({ success: false, error: "Auth required" }, { status: 401 });
+    }
 
     const newComment = await prisma.comment.create({
       data: {
         content: message,
-        ticketId: params.ticketId,
         userId: user.id,
+        ticketId: ticketid,
       },
-      include: { user: true },
+      include: {
+        user: { select: { name: true } }
+      }
     });
 
-    console.log("Comentario agregado:", newComment.id);
+    return NextResponse.json({ success: true, data: newComment });
 
-    return NextResponse.json({ success: true, data: newComment }, { status: 201 });
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json(
-      { success: false, error: "Error al crear comentario" },
-      { status: 500 }
-    );
+  } catch (error: any) {
+    console.error("DEBUG PRISMA:", error.code, error.message);
+    
+    // Ahora 'user' sí existe aquí porque se declaró arriba
+    if (error.code === 'P2003') {
+      return NextResponse.json({ 
+        success: false, 
+        error: `Database Integrity Error: User ID ${user?.id || 'unknown'} or Ticket ID missing.` 
+      }, { status: 400 });
+    }
+    
+    return NextResponse.json({ success: false, error: "Server error" }, { status: 500 });
   }
 }

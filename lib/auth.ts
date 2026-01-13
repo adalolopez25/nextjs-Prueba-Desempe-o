@@ -1,24 +1,18 @@
 // lib/auth.ts
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
-import prisma from "./prisma"; // Prisma client
 
-const JWT_SECRET = process.env.JWT_SECRET || "secret123";
+// USA LA MISMA CLAVE QUE EN EL LOGIN
+const JWT_SECRET = process.env.JWT_SECRET || "secret"; 
 
-// Firma un JWT para un usuario
 export function signJwt(user: { id: string; role: string; email: string }) {
   return jwt.sign(
-    {
-      id: user.id,
-      role: user.role,
-      email: user.email,
-    },
+    { id: user.id, role: user.role, email: user.email },
     JWT_SECRET,
     { expiresIn: "2h" }
   );
 }
 
-// Verifica un JWT
 export function verifyJwt(token: string) {
   try {
     return jwt.verify(token, JWT_SECRET) as { id: string; role: string; email: string };
@@ -27,21 +21,16 @@ export function verifyJwt(token: string) {
   }
 }
 
-// Obtiene el usuario autenticado desde la cookie y Prisma
 export async function getAuthUser() {
-  const cookieStore = await cookies();
-  const tokenCookie = cookieStore.get("token");
-  const token = tokenCookie?.value;
+  const cookieStore = await cookies(); // En Next.js 14/15 no siempre es async, mejor sin await aquí
+  const token = cookieStore.get("token")?.value;
 
   if (!token) return null;
 
   const payload = verifyJwt(token);
   if (!payload) return null;
 
-  // Busca el usuario directamente en la base de datos con Prisma
-  const user = await prisma.user.findUnique({
-    where: { id: payload.id },
-  });
-
-  return user;
+  // No hace falta buscar en Prisma aquí si solo necesitamos el ID y el Role
+  // Esto hace que el API sea mucho más rápido
+  return payload; 
 }

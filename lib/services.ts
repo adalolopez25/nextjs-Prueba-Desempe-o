@@ -7,6 +7,7 @@ const BASE = process.env.NEXT_PUBLIC_API_URL || '';
 const api = axios.create({
   baseURL: BASE,
   headers: { 'Content-Type': 'application/json' },
+  withCredentials: true,
 });
 
 // Request interceptor to add token
