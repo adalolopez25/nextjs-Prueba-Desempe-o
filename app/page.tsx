@@ -105,14 +105,7 @@ export default function Login() {
           </button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-slate-800 text-center">
-          <button
-            onClick={() => router.push("/register")}
-            className="text-slate-400 hover:text-white text-sm transition-colors"
-          >
-            ¿No tienes cuenta? <span className="text-indigo-500 font-bold">Regístrate</span>
-          </button>
-        </div>
+    
       </div>
     </div>
   );
