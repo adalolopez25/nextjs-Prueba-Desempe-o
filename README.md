@@ -107,6 +107,8 @@ npm run dev
 
     Clean UI: Mobile-responsive design using Tailwind CSS for a consistent experience across all devices.
 
+## important ## 
 
+   The registration function allows you to choose the user type and role for inserting data into the database. Registration is only enabled for logging into both user roles; it is an optional     feature and should not be considered a best practice.
 # Author # 
     : Andres Armenta Lopez
