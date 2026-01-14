@@ -70,19 +70,28 @@ DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
 JWT_SECRET="your_secure_random_string"
 
 
-4. Database Synchronization:
+4. Database Synchronization & Seeding:
+   Execute these commands to prepare your local database:
 
-npx prisma generate
-npx prisma db push
+   npx prisma generate
+   npx prisma db push
+   npx prisma db seed
 
-4. Run the application:
+
+5  . Run the application:
 
 npm run dev
 
+## Test Credentials ## 
+Once the seed command is executed, use these accounts to test the system:
 
- Key Features & Usage
- For Support Agents
+      RoleEmailPasswordSupport 
+      Agent : agent@example.com  123456  
+      Client User : client@example.com  123456
 
+## Key Features & Usage ##
+
+-- For Support Agents -- 
     Quick Stats: Track open, in-progress, and resolved tickets at a glance.
 
     Ticket Lifecycle: Move tickets through statuses (Attend ⮕ Resolve).
@@ -107,8 +116,5 @@ npm run dev
 
     Clean UI: Mobile-responsive design using Tailwind CSS for a consistent experience across all devices.
 
-## important ## 
-
-   The registration function allows you to choose the user type and role for inserting data into the database. Registration is only enabled for logging into both user roles; it is an optional     feature and should not be considered a best practice.
 # Author # 
     : Andres Armenta Lopez
